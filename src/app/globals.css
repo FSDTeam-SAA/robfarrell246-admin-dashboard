@@ -1,0 +1,303 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+
+@layer base {
+  :root {
+    /* Primary Base (#5E6755) */
+    --primary: 89 9% 37%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Primary Shades */
+    --primary-light: 89 9% 45%;
+    --primary-lighter: 89 9% 55%;
+    --primary-dark: 89 9% 28%;
+    --primary-darker: 89 9% 20%;
+
+    /* Hover & Ring */
+    --primary-hover: 89 9% 42%;
+    --ring: 89 9% 37%;
+  }
+
+  .dark {
+    /* Primary Base adjusted for dark UI */
+    --primary: 89 9% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    --primary-light: 89 9% 65%;
+    --primary-lighter: 89 9% 75%;
+    --primary-dark: 89 9% 45%;
+    --primary-darker: 89 9% 35%;
+
+    --primary-hover: 89 9% 60%;
+    --ring: 89 9% 55%;
+  }
+}
+
+
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+/* Readability guard for compact legacy dashboard utilities. */
+[class*="text-[7px]"],
+[class*="text-[8px]"] {
+  font-size: 10px !important;
+}
+
+[class*="text-[9px]"] {
+  font-size: 11px !important;
+}
+
+[class*="text-[10px]"] {
+  font-size: 12px !important;
+}
+
+[class*="text-[11px]"] {
+  font-size: 13px !important;
+}
+
+  button,
+  a,
+  input,
+  textarea,
+  select {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  :focus-visible {
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.2);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      scroll-behavior: auto !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+
+/* Auth flow shown in the supplied Vision Before Lease reference screens. */
+.auth-card {
+  width: 100% !important;
+  max-width: 800px !important;
+  border: 1px solid #344054 !important;
+  border-radius: 6px !important;
+  background: #fff !important;
+  padding: 44px 48px 48px !important;
+  box-shadow: 0 4px 18px rgb(16 24 40 / 6%) !important;
+}
+
+.auth-login-card {
+  max-width: 630px !important;
+  padding: 38px 36px 40px !important;
+}
+
+.auth-card > div:first-of-type img {
+  width: 320px !important;
+  height: auto !important;
+}
+
+.auth-login-card > div:first-of-type img {
+  width: 250px !important;
+}
+
+.auth-card h3 {
+  padding-top: 28px !important;
+  color: #101828 !important;
+  font-size: 24px !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  text-transform: uppercase;
+}
+
+.auth-login-card h3 {
+  font-size: 20px !important;
+  text-transform: none;
+}
+
+.auth-card h3 + p {
+  padding-top: 8px !important;
+  color: #667085 !important;
+  font-size: 15px !important;
+  line-height: 1.5 !important;
+}
+
+.auth-login-card h3 + p {
+  font-size: 13px !important;
+}
+
+.auth-card form {
+  padding-top: 28px !important;
+}
+
+.auth-card form > div,
+.auth-card form > div > div {
+  border-radius: 3px;
+}
+
+.auth-card label {
+  color: #344054 !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  text-transform: uppercase;
+}
+
+.auth-card input:not([type="checkbox"]) {
+  height: 50px !important;
+  border: 1px solid #98a2b3 !important;
+  border-radius: 6px !important;
+  background: #fff !important;
+  padding: 0 16px !important;
+  color: #101828 !important;
+  font-size: 14px !important;
+  box-shadow: none !important;
+}
+
+.auth-login-card input:not([type="checkbox"]) {
+  height: 40px !important;
+}
+
+.auth-card input:focus-visible {
+  border-color: #2563eb !important;
+  outline: 1px solid #2563eb !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
+}
+
+.auth-card button[type="submit"] {
+  height: 52px !important;
+  border-radius: 2px !important;
+  background: #2563eb !important;
+  color: #fff !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  text-transform: uppercase;
+  box-shadow: none !important;
+}
+
+.auth-card button[type="submit"]:hover {
+  background: #1d4ed8 !important;
+}
+
+.auth-login-card button[type="submit"] {
+  height: 42px !important;
+}
+
+.auth-card a {
+  color: #2563eb;
+}
+
+.auth-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #344054 !important;
+  font-size: 14px;
+  line-height: 28px;
+}
+
+.auth-back-link > svg {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  stroke-width: 1.5;
+}
+
+.auth-back-link + div {
+  padding-bottom: 0 !important;
+  margin-top: 28px;
+}
+
+.auth-otp-card > div:nth-of-type(2) {
+  gap: 18px !important;
+}
+
+.auth-otp-card > div:nth-of-type(2) input {
+  width: 104px !important;
+  height: 54px !important;
+  padding: 0 !important;
+  border-color: #98a2b3 !important;
+  border-radius: 6px !important;
+  background: #f2f4f7 !important;
+  font-size: 16px !important;
+}
+
+.auth-otp-card > .text-center {
+  padding: 20px 0 28px !important;
+  justify-content: flex-end !important;
+  gap: 4px;
+  font-size: 13px !important;
+}
+
+.auth-otp-card > .text-center span,
+.auth-otp-card > .text-center button {
+  font-size: 13px !important;
+}
+
+.auth-otp-card > .text-center button {
+  color: #2563eb !important;
+  font-weight: 600 !important;
+  text-decoration: underline;
+}
+
+.auth-reset-card form {
+  padding-top: 30px !important;
+}
+
+.auth-reset-card button:not([type="submit"]) {
+  top: 50% !important;
+  right: 14px !important;
+  transform: translateY(-50%);
+}
+
+@media (max-width: 640px) {
+  .auth-card,
+  .auth-login-card {
+    padding: 28px 20px 30px !important;
+  }
+
+  .auth-card > div:first-of-type img,
+  .auth-login-card > div:first-of-type img {
+    width: 220px !important;
+  }
+
+  .auth-card h3 {
+    padding-top: 22px !important;
+    font-size: 20px !important;
+  }
+
+  .auth-card h3 + p {
+    font-size: 13px !important;
+  }
+
+  .auth-otp-card > div:nth-of-type(2) {
+    gap: 8px !important;
+  }
+
+  .auth-otp-card > div:nth-of-type(2) input {
+    width: calc((100vw - 112px) / 6) !important;
+    min-width: 0;
+    height: 48px !important;
+  }
+}
