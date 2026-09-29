@@ -2,8 +2,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function DashboardOverviewSkeleton() {
   return (
-    <div aria-busy="true" aria-label="Loading dashboard overview" className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {Array.from({ length: 6 }).map((_, index) => (
+    <div aria-busy="true" aria-label="Loading dashboard overview" className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      {Array.from({ length: 4 }).map((_, index) => (
         <div
           key={index}
           className="flex min-h-[96px] items-center justify-between gap-4 rounded-lg border border-[#E7EAE5] bg-white px-5 shadow-[0_2px_5px_rgba(0,0,0,0.08)]"

@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { CalendarDays, CheckCircle2, DollarSign, FileText, RefreshCcw, TriangleAlert, Users } from "lucide-react";
+import { Bell, CircleDollarSign, Coins, RefreshCcw, Users } from "lucide-react";
 import { useSession } from "next-auth/react";
 
 import DashboardOverviewSkeleton from "./dashboard-overview-skeleton";
@@ -9,60 +9,71 @@ import { DashboardOverviewsApiResponse } from "./dashboard-overview-data-type";
 
 const overviewCards = [
   {
-    label: "Total Clients",
-    key: "totalClients",
-    fallbackKey: "totalUsers",
+    label: "Total Users",
+    key: "totalUsers",
+    fallbackKey: undefined,
     icon: Users,
-    iconClass: "bg-[#EAF1FF] text-[#1769FF]",
+    accent: "#3478FF",
+    chartFill: "#F0F5FF",
+    iconClass: "border-[#3478FF] bg-[#F4F7FF] text-[#3478FF]",
+    trend: "M1 43 C5 31 8 32 12 29 S18 35 22 26 S28 34 33 29 S39 22 44 29 S50 33 56 26 S62 28 67 24 S73 25 78 18 S84 21 89 15 S95 17 100 8 S106 10 111 1",
+    trendLabel: "+18% MoM",
+    trendClass: "bg-[#F0F5FF] text-[#3478FF]",
     valuePrefix: "",
     currency: false,
   },
   {
-    label: "Active Requests",
-    key: "activeRequests",
-    fallbackKey: "totalSubmissions",
-    icon: FileText,
-    iconClass: "bg-[#FFF7E1] text-[#B58200]",
+    label: "Active Subscribers",
+    key: "totalSubmissions",
+    fallbackKey: undefined,
+    icon: Bell,
+    accent: "#0793B8",
+    chartFill: "#ECFCFF",
+    iconClass: "border-[#0793B8] bg-[#F0FCFF] text-[#0793B8]",
+    trend: "M1 44 C5 34 9 37 14 30 S20 31 25 29 S31 35 36 27 S42 33 48 27 S54 31 59 22 S65 28 70 20 S76 25 81 17 S88 21 93 12 S100 17 105 7 S109 10 111 1",
+    trendLabel: "+24 this month",
+    trendClass: "bg-[#ECFCFF] text-[#0793B8]",
     valuePrefix: "",
     currency: false,
   },
   {
-    label: "Completed This Month",
-    key: "completedThisMonth",
-    fallbackKey: "totalPayments",
-    icon: CheckCircle2,
-    iconClass: "bg-[#E9F8F0] text-[#16864C]",
-    valuePrefix: "",
-    currency: false,
-  },
-  {
-    label: "Revenue Tracked",
-    key: "revenueTracked",
-    fallbackKey: "totalRevenue",
-    icon: DollarSign,
-    valuePrefix: "AED ",
-    iconClass: "bg-[#F4EAFE] text-[#913CF0]",
+    label: "Monthly Revenue",
+    key: "totalRevenue",
+    fallbackKey: undefined,
+    icon: CircleDollarSign,
+    accent: "#20B75A",
+    chartFill: "#EEFCF3",
+    iconClass: "border-[#20B75A] bg-[#F0FCF4] text-[#20B75A]",
+    trend: "M1 43 C6 31 10 35 15 28 S21 34 26 25 S32 30 37 26 S43 34 49 24 S55 30 60 22 S66 29 71 20 S77 25 82 16 S88 20 93 12 S100 16 105 6 S109 9 111 1",
+    trendLabel: "+12.4% MoM",
+    trendClass: "bg-[#EEFCF3] text-[#20B75A]",
+    valuePrefix: "$",
     currency: true,
   },
   {
-    label: "Pending Bookings",
-    key: "pendingBookings",
+    label: "Credits Consumed",
+    key: "totalPayments",
     fallbackKey: undefined,
-    icon: CalendarDays,
-    iconClass: "bg-[#EAF9F7] text-[#069B8E]",
+    icon: Coins,
     valuePrefix: "",
-    currency: false,
-  },
-  {
-    label: "Employees Expiring",
-    key: "employeesExpiring",
-    fallbackKey: undefined,
-    icon: TriangleAlert,
-    iconClass: "bg-[#FDE5E1] text-[#E45042]",
-    valuePrefix: "",
+    accent: "#F5A524",
+    chartFill: "#FFFAEA",
+    iconClass: "border-[#F5A524] bg-[#FFF9E9] text-[#F5A524]",
+    trend: "M1 44 C6 35 10 38 15 30 S21 34 26 26 S32 30 37 24 S43 28 48 22 S54 29 59 18 S65 24 70 17 S76 20 81 13 S87 17 92 9 S99 12 104 5 S108 9 111 1",
+    trendLabel: "Current billing cycle",
+    trendClass: "bg-[#FFFAEA] text-[#F5A524]",
     currency: false,
   },
 ] as const;
+
+function TrendChart({ color, fill, path }: { color: string; fill: string; path: string }) {
+  return (
+    <svg aria-hidden="true" className="h-[52px] w-[84px] shrink-0 sm:h-[58px] sm:w-[94px]" viewBox="0 0 112 48" fill="none" preserveAspectRatio="none">
+      <path d={`${path} V48 H1 Z`} fill={fill} />
+      <path d={path} stroke={color} strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" />
+    </svg>
+  );
+}
 
 const formatNumber = (value?: number) =>
   new Intl.NumberFormat("en-US").format(value ?? 0);
@@ -137,23 +148,25 @@ export function DashboardOverview() {
   }
 
   return (
-    <div className="mx-auto grid w-full max-w-[1600px] grid-cols-1 gap-4 px-4 py-5 sm:grid-cols-2 sm:px-6 lg:grid-cols-3">
-      {overviewCards.map(({ label, key, fallbackKey, icon: Icon, valuePrefix = "", iconClass, currency }) => {
+    <div className="mx-auto grid w-full grid-cols-1 gap-3 px-4 py-3 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
+      {overviewCards.map(({ label, key, fallbackKey, icon: Icon, valuePrefix = "", iconClass, currency, accent, chartFill, trend, trendLabel, trendClass }) => {
         const value = data?.data?.[key] ?? (fallbackKey ? data?.data?.[fallbackKey] : undefined) ?? 0;
         return (
         <div
           key={key}
-          className="group flex min-h-[86px] items-center justify-between gap-4 rounded-lg border border-[#E9EBEF] bg-white px-4 py-4 shadow-[0_2px_5px_rgba(0,0,0,0.08)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(0,0,0,0.09)] sm:min-h-[96px] sm:px-5"
+          className="group relative min-h-[96px] overflow-hidden rounded-md border border-[#D9E1EB] bg-white px-3 py-2 shadow-[0_2px_5px_rgba(24,39,75,0.04)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(24,39,75,0.09)]"
         >
-          <div className="min-w-0">
-            <p className="truncate text-[10px] font-medium leading-normal text-[#555B63] sm:text-[11px]">{label}</p>
-            <p className="mt-1 truncate text-xl font-bold leading-tight tracking-[-0.02em] text-[#202328] sm:text-[23px]">
+          <span className={`flex h-7 w-7 items-center justify-center rounded-[5px] border ${iconClass}`}>
+            <Icon className="h-4 w-4" strokeWidth={1.7} />
+          </span>
+          <div className="mt-1 min-w-0 pr-[80px]">
+            <p className="truncate text-[18px] font-bold leading-none tracking-[-0.02em] text-[#131928] sm:text-[20px]">
               {valuePrefix}{currency ? formatNumber(value) : formatNumber(value)}
             </p>
+            <p className="mt-1 truncate text-[10px] font-medium leading-none text-[#596579] sm:text-[11px]">{label}</p>
+            <span className={`mt-1 inline-flex rounded px-1 py-0.5 text-[8px] font-medium leading-none sm:text-[9px] ${trendClass}`}>{trendLabel}</span>
           </div>
-          <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${iconClass}`}>
-            <Icon className="h-6 w-6" strokeWidth={2} />
-          </span>
+          <div className="absolute bottom-2 right-2.5"><TrendChart color={accent} fill={chartFill} path={trend} /></div>
         </div>
         );
       })}
