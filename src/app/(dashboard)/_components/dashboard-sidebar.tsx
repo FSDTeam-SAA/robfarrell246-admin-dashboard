@@ -70,7 +70,7 @@ export function DashboardSidebar() {
 
   return (
     <>
-      <Sidebar className="border-r border-[#D9E0EA] [--sidebar-width:228px]">
+      <Sidebar className="border-r border-[#D9E0EA] [--sidebar-width:320px]">
         <SidebarContent
           className="scrollbar-hide gap-0 bg-white bg-cover bg-center bg-no-repeat"
           style={{
@@ -79,7 +79,7 @@ export function DashboardSidebar() {
           }}
         >
           <div className="flex min-h-svh flex-col">
-            <div className="flex h-[62px] shrink-0 items-center border-b border-[#DCE3EC] bg-white px-5">
+            <div className="flex h-[88px] shrink-0 items-center border-b border-[#DCE3EC] bg-white px-10">
               <Link
                 href="/"
                 aria-label="Go to dashboard overview"
@@ -89,21 +89,21 @@ export function DashboardSidebar() {
                   src={logo}
                   alt="Vision Before Lease"
                   priority
-                  className="h-auto w-[188px]"
+                  className="h-auto w-[244px]"
                 />
               </Link>
             </div>
 
-            <nav aria-label="Dashboard navigation" className="flex-1 px-[9px] pb-8 pt-4">
+            <nav aria-label="Dashboard navigation" className="flex-1 px-3 pb-8 pt-[18px]">
               {navigationSections.map((section, sectionIndex) => (
                 <section
                   key={section.label}
                   aria-labelledby={`sidebar-section-${sectionIndex}`}
-                  className={sectionIndex === 0 ? "" : "mt-[11px]"}
+                  className={sectionIndex === 0 ? "" : "mt-[15px]"}
                 >
                   <h2
                     id={`sidebar-section-${sectionIndex}`}
-                    className="mb-[15px] px-[13px] text-[0.625rem] font-normal uppercase leading-[1.2] text-[#61718A]"
+                      className="mb-[15px] px-[18px] text-sm font-normal uppercase leading-[1.2] text-[#61718A]"
                   >
                     {section.label}
                   </h2>
@@ -126,15 +126,15 @@ export function DashboardSidebar() {
                                   }
                                 : undefined
                             }
-                            className={`flex h-[30px] items-center gap-[9px] border-y px-[13px] text-[0.75rem] font-normal uppercase leading-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#2F6FF2] ${
+                            className={`flex h-10 items-center gap-3 border-y px-[18px] text-base font-normal leading-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#2F6FF2] ${
                               active
                                 ? "border-[#2F6FF2] bg-white/25 text-[#1769FF]"
                                 : "border-transparent text-[#52617A] hover:bg-white/45 hover:text-[#2F6FF2]"
-                            }`}
+                            } ${item.title === "Help & Support" ? "" : "uppercase"}`}
                           >
                             <item.icon
                               aria-hidden="true"
-                              className={`h-[15px] w-[15px] shrink-0 ${active && item.title === "Dashboard" ? "fill-current" : ""}`}
+                                className={`h-5 w-5 shrink-0 ${active && item.title === "Dashboard" ? "fill-current" : ""}`}
                               strokeWidth={active ? 2.2 : 2}
                             />
                             <span>{item.title}</span>
@@ -149,9 +149,9 @@ export function DashboardSidebar() {
               <button
                 type="button"
                 onClick={() => setLogoutModalOpen(true)}
-                className="mt-[5px] flex h-[30px] w-full items-center gap-[9px] border-y border-transparent px-[13px] text-left text-[0.75rem] font-normal uppercase leading-none text-[#ED3237] transition-colors hover:bg-red-50/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#ED3237]"
+                  className="mt-[5px] flex h-10 w-full items-center gap-3 border-y border-transparent px-[18px] text-left text-base font-normal uppercase leading-none text-[#ED3237] transition-colors hover:bg-red-50/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#ED3237]"
               >
-                <LogOut aria-hidden="true" className="h-[15px] w-[15px] shrink-0" strokeWidth={2.2} />
+                <LogOut aria-hidden="true" className="h-5 w-5 shrink-0" strokeWidth={2.2} />
                 <span>Sign Out</span>
               </button>
             </nav>

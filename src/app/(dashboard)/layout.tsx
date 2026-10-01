@@ -6,7 +6,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="min-h-screen bg-[#F7F8F6]">
       <SidebarProvider defaultOpen={true}>
-        <div style={{ "--sidebar-width": "228px" } as React.CSSProperties}>
+        <div style={{ "--sidebar-width": "320px" } as React.CSSProperties}>
           <DashboardSidebar />
         </div>
         <main className="min-w-0 flex-1">
