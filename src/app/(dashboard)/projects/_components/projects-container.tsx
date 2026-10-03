@@ -9,6 +9,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import ProjectDetail from "./project-detail";
 
 type Project = {
   id: number;
@@ -63,6 +64,7 @@ const ProjectsContainer = () => {
   const [query, setQuery] = useState("");
   const [analysisType, setAnalysisType] = useState("ALL");
   const [page, setPage] = useState(1);
+  const [showDetails, setShowDetails] = useState(false);
   const totalPages = 2;
 
   const filteredProjects = useMemo(() => {
@@ -76,6 +78,10 @@ const ProjectsContainer = () => {
         (analysisType === "ALL" || project.analysisType === analysisType),
     );
   }, [analysisType, projects, query]);
+
+  if (showDetails) {
+    return <ProjectDetail onBack={() => setShowDetails(false)} />;
+  }
 
   return (
     <section className="p-4 sm:p-6">
@@ -180,6 +186,7 @@ const ProjectsContainer = () => {
                     <div className="flex items-center justify-center gap-2">
                       <button
                         type="button"
+                        onClick={() => setShowDetails(true)}
                         aria-label={`View details for ${project.address}`}
                         className="inline-flex h-[25px] items-center gap-2 rounded-[2px] bg-[#F1F4F8] px-3 text-[12px] font-medium text-[#27364B] transition hover:bg-[#E5EAF1]"
                       >
