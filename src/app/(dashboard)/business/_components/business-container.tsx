@@ -9,6 +9,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import BusinessDetail from "./business-detail";
 
 type Business = {
   id: number;
@@ -49,6 +50,7 @@ const BusinessContainer = () => {
   const [query, setQuery] = useState("");
   const [businessType, setBusinessType] = useState("ALL");
   const [page, setPage] = useState(1);
+  const [selectedBusiness, setSelectedBusiness] = useState<Business | null>(null);
   const totalPages = 2;
 
   const filteredBusinesses = useMemo(() => {
@@ -63,6 +65,10 @@ const BusinessContainer = () => {
         (businessType === "ALL" || business.type === businessType),
     );
   }, [businessType, businesses, query]);
+
+  if (selectedBusiness) {
+    return <BusinessDetail businessName={selectedBusiness.name} businessType={selectedBusiness.type} onBack={() => setSelectedBusiness(null)} />;
+  }
 
   return (
     <section className="p-4">
@@ -166,6 +172,7 @@ const BusinessContainer = () => {
                     <div className="flex items-center justify-center gap-2">
                       <button
                         type="button"
+                        onClick={() => setSelectedBusiness(business)}
                         aria-label={`View details for ${business.name}`}
                         className="inline-flex h-[25px] items-center gap-2 rounded-[2px] bg-[#F1F4F8] px-3 text-[12px] font-medium text-[#27364B] transition hover:bg-[#E5EAF1]"
                       >
