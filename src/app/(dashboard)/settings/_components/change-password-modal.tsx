@@ -3,6 +3,8 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { KeyRound, X } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
+import { useChangePassword } from "./settings-api";
 
 type ChangePasswordModalProps = {
   isOpen: boolean;
@@ -15,6 +17,7 @@ const ChangePasswordModal = ({ isOpen, onClose, onSave }: ChangePasswordModalPro
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const changePassword = useChangePassword();
 
   const close = () => {
     setError("");
@@ -31,11 +34,17 @@ const ChangePasswordModal = ({ isOpen, onClose, onSave }: ChangePasswordModalPro
       setError("New password and confirmation must match.");
       return;
     }
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
-    setError("");
-    onSave();
+    changePassword.mutate({ oldPassword: currentPassword, newPassword }, {
+      onSuccess: () => {
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        setError("");
+        toast.success("Password updated successfully");
+        onSave();
+      },
+      onError: (mutationError) => setError(mutationError.message),
+    });
   };
 
   return (
@@ -51,7 +60,7 @@ const ChangePasswordModal = ({ isOpen, onClose, onSave }: ChangePasswordModalPro
           <div className="mt-3"><PasswordField label="New Password" value={newPassword} onChange={setNewPassword} /></div>
           <div className="mt-3"><PasswordField label="Confirm New Password" value={confirmPassword} onChange={setConfirmPassword} /></div>
           {error && <p className="mt-3 text-[11px] text-[#D92D20]" role="alert">{error}</p>}
-          <footer className="mt-5 grid grid-cols-2 gap-3"><button type="button" onClick={close} className="h-[35px] bg-[#F1F4F8] text-[12px] text-[#53647C] hover:bg-[#E7ECF2]">Cancel</button><button type="submit" className="h-[35px] bg-[#2861E7] text-[12px] font-medium text-white hover:bg-[#1F53CC]">Update Password</button></footer>
+          <footer className="mt-5 grid grid-cols-2 gap-3"><button type="button" onClick={close} className="h-[35px] bg-[#F1F4F8] text-[12px] text-[#53647C] hover:bg-[#E7ECF2]">Cancel</button><button disabled={changePassword.isPending} type="submit" className="h-[35px] bg-[#2861E7] text-[12px] font-medium text-white hover:bg-[#1F53CC] disabled:opacity-60">{changePassword.isPending ? "Updating..." : "Update Password"}</button></footer>
         </form>
       </DialogContent>
     </Dialog>

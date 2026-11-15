@@ -1,19 +1,20 @@
-export interface DashboardData {
-  totalUsers: number;
-  totalSubmissions: number;
-  totalPayments: number;
-  totalRevenue: number;
-  totalClients?: number;
-  activeRequests?: number;
-  completedThisMonth?: number;
-  revenueTracked?: number;
-  pendingBookings?: number;
-  employeesExpiring?: number;
+export interface DashboardCardMetric {
+  value: number;
+  newThisMonth?: number;
+  thisMonth?: number;
+  momPercent?: number;
 }
 
-export interface DashboardOverviewsApiResponse {
+export interface DashboardCardsData {
+  totalUsers: DashboardCardMetric;
+  activeSubscribers: DashboardCardMetric;
+  monthlyRevenue: DashboardCardMetric;
+  creditsConsumed: DashboardCardMetric;
+}
+
+export interface DashboardCardsApiResponse {
   statusCode: number;
   success: boolean;
   message: string;
-  data: DashboardData;
+  data: DashboardCardsData;
 }

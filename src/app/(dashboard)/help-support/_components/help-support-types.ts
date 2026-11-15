@@ -1,16 +1,97 @@
-export type TicketStatus = "Open" | "In Review" | "Waiting for User" | "Resolved" | "Closed";
+export type TicketStatus = "Open" | "In Review" | "Resolved" | "Closed";
 export type TicketImpact = "Low" | "Normal" | "High";
 
-export type SupportTicket = {
-  id: string; customer: string; email: string; role: "Broker" | "Tenant"; subject: string; message: string; project: string; topic: string; impact: TicketImpact; status: TicketStatus; assignee: string; createdAt: string;
+export type SupportReply = {
+  id: string;
+  name: string;
+  role: string;
+  message: string;
+  createdAt?: string;
 };
 
-export const statusOptions: TicketStatus[] = ["Open", "In Review", "Waiting for User", "Resolved", "Closed"];
-export const impactOptions: TicketImpact[] = ["Low", "Normal", "High"];
-export const assigneeOptions = ["Unassigned (Support Pool)", "Elena Rostova (Lead Underwriter)", "Marcus Chen (Spatial Tech)"];
+export type SupportTicket = {
+  id: string;
+  ticketNumber: string;
+  customer: string;
+  email: string;
+  role: "Landlord" | "Tenant" | "Unknown";
+  subject: string;
+  message: string;
+  project: string;
+  topic: string;
+  impact: TicketImpact;
+  status: TicketStatus;
+  assignee: string;
+  createdAt: string;
+  replies: SupportReply[];
+  attachmentUrl?: string;
+};
 
-export const supportTickets: SupportTicket[] = [
-  { id: "SUP-10148", customer: "Sarah Jenkins, CCIM", email: "sarah.jenkins@austinretailpartners.com", role: "Broker", subject: "Report export formatting", message: "The report PDF is cutting off the Competition Map on page 4 when exported with expansive resolution. Could you look into adjusting the page break margins so the legend does not get clipped?", project: "123 Market Street Site 104", topic: "Report / Export", impact: "Normal", status: "In Review", assignee: "Unassigned (Support Pool)", createdAt: "Sep 15, 2026, 03:42 PM" },
-  { id: "SUP-10149", customer: "Sarah Jenkins, CCIM", email: "sarah.jenkins@austinretailpartners.com", role: "Broker", subject: "Competition map data", message: "Wanted to verify if we can filter the competition map by brand category before exporting the report.", project: "123 Market Street Site 104", topic: "Competition Mapping", impact: "Low", status: "Resolved", assignee: "Unassigned (Support Pool)", createdAt: "Sep 14, 2026, 11:20 AM" },
-  { id: "SUP-10150", customer: "Marcus Vance", email: "marcus@vancehospitality.com", role: "Tenant", subject: "Fit Score calculation for space", message: "Evaluating 123 Market Street for our next location. Can you clarify how the Fit Score is calculated?", project: "123 Market Street Site 104", topic: "Fit Score", impact: "Normal", status: "Waiting for User", assignee: "Unassigned (Support Pool)", createdAt: "Sep 13, 2026, 09:15 AM" },
-];
+type BackendTicket = {
+  _id: string;
+  ticketNumber: string;
+  user?: { name?: string; email?: string; role?: string };
+  subject: string;
+  description: string;
+  topic: string;
+  priority: "LOW" | "NORMAL" | "HIGH";
+  status: "OPEN" | "IN_REVIEW" | "RESOLVED" | "CLOSED";
+  createdAt: string;
+  attachmentUrl?: string;
+  replies?: Array<{
+    _id?: string;
+    sender?: { name?: string; role?: string };
+    senderRole?: string;
+    message: string;
+    createdAt?: string;
+  }>;
+};
+
+const statusLabels: Record<BackendTicket["status"], TicketStatus> = {
+  OPEN: "Open",
+  IN_REVIEW: "In Review",
+  RESOLVED: "Resolved",
+  CLOSED: "Closed",
+};
+
+const impactLabels: Record<BackendTicket["priority"], TicketImpact> = {
+  LOW: "Low",
+  NORMAL: "Normal",
+  HIGH: "High",
+};
+
+export const statusToApi: Record<TicketStatus, BackendTicket["status"]> = {
+  Open: "OPEN",
+  "In Review": "IN_REVIEW",
+  Resolved: "RESOLVED",
+  Closed: "CLOSED",
+};
+
+export const statusOptions: TicketStatus[] = ["Open", "In Review", "Resolved", "Closed"];
+export const impactOptions: TicketImpact[] = ["Low", "Normal", "High"];
+
+export function toSupportTicket(ticket: BackendTicket): SupportTicket {
+  return {
+    id: ticket._id,
+    ticketNumber: ticket.ticketNumber,
+    customer: ticket.user?.name || "Unknown user",
+    email: ticket.user?.email || "—",
+    role: ticket.user?.role === "LANDLORD" ? "Landlord" : ticket.user?.role === "TENANT" ? "Tenant" : "Unknown",
+    subject: ticket.subject,
+    message: ticket.description,
+    project: "—",
+    topic: ticket.topic.replaceAll("_", " "),
+    impact: impactLabels[ticket.priority],
+    status: statusLabels[ticket.status],
+    assignee: "Unassigned (Support Pool)",
+    createdAt: new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeStyle: "short" }).format(new Date(ticket.createdAt)),
+    attachmentUrl: ticket.attachmentUrl,
+    replies: (ticket.replies || []).map((reply, index) => ({
+      id: reply._id || `${ticket._id}-${index}`,
+      name: reply.sender?.name || "Support Team",
+      role: reply.sender?.role || reply.senderRole || "Support",
+      message: reply.message,
+      createdAt: reply.createdAt,
+    })),
+  };
+}

@@ -1,41 +1,17 @@
-import { ArrowRight, CircleUserRound } from "lucide-react";
+"use client";
 
-const recentUsers = [
-  {
-    name: "Sarah Jenkins",
-    email: "sarah.jenkins@agency.com",
-    type: "BROKER",
-    plan: "plan_pro_broker",
-    credits: "572 Credits",
-    status: "ACTIVE",
-  },
-  {
-    name: "Marcus Vance",
-    email: "marcus@vance.com",
-    type: "TENANT",
-    plan: "plan_tenant_growth",
-    credits: "676 Credits",
-    status: "ACTIVE",
-  },
-  {
-    name: "Elena Rostova",
-    email: "elena@dallascre.com",
-    type: "BROKER",
-    plan: "plan_starter_broker",
-    credits: "99 Credits",
-    status: "ACTIVE",
-  },
-  {
-    name: "David Chen",
-    email: "david@matchacase.com",
-    type: "TENANT",
-    plan: "plan_tenant_growth",
-    credits: "0 Credits",
-    status: "SUSPENDED",
-  },
-] as const;
+import { ArrowRight, CircleUserRound } from "lucide-react";
+import { ApiEmptyState, ApiErrorState, ApiLoadingSkeleton } from "./api-feedback";
+import { useAdminDashboardCharts } from "./admin-dashboard-queries";
 
 const RecentUser = () => {
+  const { data, isLoading, isError, error, refetch } = useAdminDashboardCharts("12m");
+  const recentUsers = data?.data.recentUsers ?? [];
+
+  if (isLoading) return <ApiLoadingSkeleton rows={4} />;
+  if (isError) return <ApiErrorState message={error.message} onRetry={() => refetch()} />;
+  if (recentUsers.length === 0) return <ApiEmptyState message="No recent users found." />;
+
   return (
     <section className="overflow-hidden rounded-md border border-[#C9D7E8] bg-white shadow-[0_2px_6px_rgba(24,39,75,0.03)]">
       <header className="flex h-[50px] items-center justify-between px-5">
@@ -65,7 +41,7 @@ const RecentUser = () => {
           <tbody>
             {recentUsers.map((user) => {
               const isActive = user.status === "ACTIVE";
-              const isBroker = user.type === "BROKER";
+              const isBroker = user.role === "LANDLORD";
 
               return (
                 <tr key={user.email} className="h-[61px] border-t border-[#D8DEE8] text-[12px] text-[#192238]">
@@ -75,14 +51,14 @@ const RecentUser = () => {
                   </td>
                   <td className="px-2 py-2">
                     <span className={`inline-flex rounded-md px-2 py-0.5 text-[10px] font-medium leading-3 ${isBroker ? "bg-[#EEF6FF] text-[#1F5AFF]" : "bg-[#EDFCF2] text-[#08A94E]"}`}>
-                      {user.type}
+                      {user.role}
                     </span>
                   </td>
                   <td className="px-2 py-2">
-                    <span className="block max-w-[110px] break-words text-[11px] leading-[13px] text-[#1F5EFF]">{user.plan}</span>
+                    <span className="block max-w-[110px] break-words text-[11px] leading-[13px] text-[#1F5EFF]">{user.plan || "No plan"}</span>
                   </td>
                   <td className="px-2 py-2">
-                    <span className="inline-flex rounded-md bg-[#FFF9EC] px-2 py-0.5 text-[10px] leading-3 text-[#F07800]">{user.credits}</span>
+                    <span className="inline-flex rounded-md bg-[#FFF9EC] px-2 py-0.5 text-[10px] leading-3 text-[#F07800]">{user.credits} Credits</span>
                   </td>
                   <td className="px-2 py-2">
                     <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium leading-3 ${isActive ? "bg-[#EDFCF2] text-[#08A94E]" : "bg-[#FFF0F1] text-[#EF2332]"}`}>

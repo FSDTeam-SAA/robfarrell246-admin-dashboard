@@ -1,22 +1,42 @@
 "use client";
 
 import { useState } from "react";
+import { ApiEmptyState, ApiErrorState, ApiLoadingSkeleton } from "./api-feedback";
+import { useAdminDashboardCharts } from "./admin-dashboard-queries";
 
 const periods = ["30 days", "7 days", "12 months"] as const;
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-// Each value is a short column of tiled blocks, creating the stepped chart shown in the design.
-const monthlyTiles = [
-  [2, 3, 4, 5, 3], [8, 10, 11, 9, 6], [5, 7, 8, 6, 4], [3, 4, 6, 3, 2],
-  [4, 7, 10, 11, 8], [9, 10, 8, 7, 5], [4, 5, 4, 3, 4], [4, 7, 10, 6, 5],
-  [4, 8, 5, 4, 7], [3, 6, 3, 4, 5], [4, 5, 6, 7, 4], [3, 4, 6, 9, 4],
-] as const;
-
 const yLabels = ["$300k", "$225k", "$150k", "$75k", "$0k"];
+
+const chartRange = {
+  "7 days": "7d",
+  "30 days": "30d",
+  "12 months": "12m",
+} as const;
+
+const compactLabel = (label: string) => label.length > 7 ? label.slice(5) : label;
+const formatCurrency = (value: number) =>
+  new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(value);
 
 const RevenueAndProfit = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<(typeof periods)[number]>("12 months");
   const [activeMonth, setActiveMonth] = useState(5);
+  const { data, isLoading, isError, error, refetch } = useAdminDashboardCharts(chartRange[selectedPeriod]);
+  const chartData = data?.data.revenueChart ?? [];
+  const maxValue = Math.max(
+    ...chartData.flatMap(({ revenue, profit }) => [revenue, profit]),
+    1,
+  );
+  const activeIndex = Math.min(activeMonth, Math.max(chartData.length - 1, 0));
+
+  if (isLoading) return <ApiLoadingSkeleton rows={5} />;
+  if (isError) return <ApiErrorState message={error.message} onRetry={() => refetch()} />;
+  if (chartData.length === 0) return <ApiEmptyState message="No revenue data found for this period." />;
 
   return (
     <section className="overflow-hidden rounded-md border border-[#C9D7E8] bg-white shadow-[0_2px_6px_rgba(24,39,75,0.03)]">
@@ -51,12 +71,14 @@ const RevenueAndProfit = () => {
               {yLabels.map((label, index) => <text key={label} x="45" y={18 + index * 77}>{label}</text>)}
             </g>
 
-            {monthlyTiles.map((columns, monthIndex) =>
-              columns.map((height, columnIndex) => {
-                const x = 57 + monthIndex * 54.8 + columnIndex * 10.35;
+            {chartData.map((point, monthIndex) =>
+              Array.from({ length: 5 }).map((_, columnIndex) => {
+                const x = 57 + monthIndex * (657 / Math.max(chartData.length, 1)) + columnIndex * 10.35;
                 const hoverable = monthIndex === activeMonth;
-                const blocks = Array.from({ length: height });
-                const paleBlocks = Array.from({ length: Math.max(1, Math.round(height * 0.75)) });
+                const revenueHeight = Math.max(1, Math.round((point.revenue / maxValue) * 11));
+                const profitHeight = Math.max(1, Math.round((point.profit / maxValue) * 11));
+                const blocks = Array.from({ length: revenueHeight });
+                const paleBlocks = Array.from({ length: profitHeight });
 
                 return (
                   <g key={`${monthIndex}-${columnIndex}`} onMouseEnter={() => setActiveMonth(monthIndex)} className="cursor-pointer">
@@ -64,7 +86,7 @@ const RevenueAndProfit = () => {
                       <rect key={`dark-${blockIndex}`} x={x} y={281 - blockIndex * 13.2} width="8.5" height="11" rx="1.5" fill={hoverable ? "#536983" : "#64758E"} />
                     ))}
                     {paleBlocks.map((_, blockIndex) => (
-                      <rect key={`light-${blockIndex}`} x={x} y={281 - (height + blockIndex) * 13.2} width="8.5" height="11" rx="1.5" fill={hoverable ? "#D5DFEB" : "#E0E7F0"} />
+                      <rect key={`light-${blockIndex}`} x={x} y={281 - (revenueHeight + blockIndex) * 13.2} width="8.5" height="11" rx="1.5" fill={hoverable ? "#D5DFEB" : "#E0E7F0"} />
                     ))}
                   </g>
                 );
@@ -72,10 +94,10 @@ const RevenueAndProfit = () => {
             )}
 
             <g fill="#667A99" fontFamily="inherit" fontSize="14" textAnchor="middle">
-              {months.map((month, index) => <text key={month} x={70 + index * 54.8} y="325">{month}</text>)}
+              {chartData.map((point, index) => <text key={point.label} x={70 + index * (657 / Math.max(chartData.length, 1))} y="325">{compactLabel(point.label)}</text>)}
             </g>
             <g fill="#667A99" fontSize="13" textAnchor="middle">
-              {months.slice(0, -1).map((month, index) => <text key={`${month}-dot`} x={97.5 + index * 54.8} y="325">·</text>)}
+              {chartData.slice(0, -1).map((point, index) => <text key={`${point.label}-dot`} x={97.5 + index * (657 / Math.max(chartData.length, 1))} y="325">·</text>)}
             </g>
           </svg>
 
@@ -83,9 +105,9 @@ const RevenueAndProfit = () => {
             className="pointer-events-none absolute w-[109px] rounded-md bg-white px-2.5 py-2 text-[11px] text-[#5D6D85] shadow-[0_4px_12px_rgba(35,51,82,0.10)]"
             style={{ left: `${12 + activeMonth * 7.2}%`, top: "46px" }}
           >
-            <p className="border-b border-[#EEF1F5] pb-1 font-medium text-[#1D293D]">{months[activeMonth]} 2026</p>
-            <p className="mt-1 flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[#64758E]" />Revenue <b className="text-[#1D293D]">$100k</b></p>
-            <p className="mt-1 flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[#64758E]" />Profit <b className="text-[#1D293D]">$50k</b></p>
+            <p className="border-b border-[#EEF1F5] pb-1 font-medium text-[#1D293D]">{chartData[activeIndex]?.label || months[activeMonth]}</p>
+            <p className="mt-1 flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[#64758E]" />Revenue <b className="text-[#1D293D]">{formatCurrency(chartData[activeIndex]?.revenue ?? 0)}</b></p>
+            <p className="mt-1 flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[#64758E]" />Profit <b className="text-[#1D293D]">{formatCurrency(chartData[activeIndex]?.profit ?? 0)}</b></p>
           </div>
         </div>
       </div>

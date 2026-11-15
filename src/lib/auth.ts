@@ -1,9 +1,24 @@
 import { NextAuthOptions } from "next-auth";
-import { JWT } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5001/api/v1";
+  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5003/api/v1";
+
+type LoginResponse = {
+  success: boolean;
+  message?: string;
+  data?: {
+    user?: {
+      _id?: string;
+      name?: string;
+      email?: string;
+      role?: string;
+      profileImage?: string;
+      refreshToken?: string;
+    };
+    accessToken?: string;
+  };
+};
 
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
@@ -44,7 +59,7 @@ export const authOptions: NextAuthOptions = {
             }
           );
 
-          const response = await res.json();
+          const response = (await res.json()) as LoginResponse;
 
           if (!res.ok || !response?.success) {
             throw new Error(response?.message || "INVALID_CREDENTIALS");
@@ -52,24 +67,24 @@ export const authOptions: NextAuthOptions = {
 
           const { user, accessToken } = response.data || {};
 
-          if (!user || !accessToken) {
+          if (!user?._id || !user.name || !user.email || !accessToken) {
             throw new Error("Authentication response is missing user data");
           }
 
-          const normalizedRole = String(user.role).toLowerCase();
+          const normalizedRole = String(user.role).toUpperCase();
 
-          if (normalizedRole !== "admin") {
+          if (normalizedRole !== "ADMIN") {
             throw new Error("ADMIN_ONLY");
           }
 
           return {
             id: user._id,
-            firstName: user.firstName,
-            lastName: user.lastName,
+            name: user.name,
             email: user.email,
             role: normalizedRole,
-            profileImage: user.profileImage,
+            profileImage: user.profileImage || "",
             accessToken,
+            refreshToken: user.refreshToken,
           };
         } catch (error) {
           console.error("Authentication error:", error);
@@ -86,30 +101,27 @@ export const authOptions: NextAuthOptions = {
 
 
   callbacks: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async jwt({ token, user }: { token: JWT; user?: any }) {
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.firstName = user.firstName;
-        token.lastName = user.lastName;
+        token.name = user.name;
         token.email = user.email;
         token.role = user.role;
         token.profileImage = user.profileImage;
         token.accessToken = user.accessToken;
+        token.refreshToken = user.refreshToken;
       }
       return token;
     },
 
-    //eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async session({ session, token }: { session: any; token: JWT }) {
+    async session({ session, token }) {
       session.user = {
-        id: token.id,
-        firstName: token.firstName,
-        lastName: token.lastName,
+        id: token.id || "",
+        name: token.name,
         email: token.email,
-        role: token.role,
+        role: token.role || "ADMIN",
         profileImage: token.profileImage,
-        accessToken: token.accessToken,
+        accessToken: token.accessToken || "",
       };
       return session;
     },

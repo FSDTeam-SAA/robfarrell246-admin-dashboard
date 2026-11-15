@@ -5,13 +5,13 @@ import { Bell, CircleDollarSign, Coins, RefreshCcw, Users } from "lucide-react";
 import { useSession } from "next-auth/react";
 
 import DashboardOverviewSkeleton from "./dashboard-overview-skeleton";
-import { DashboardOverviewsApiResponse } from "./dashboard-overview-data-type";
+import { ApiEmptyState } from "./api-feedback";
+import { DashboardCardsApiResponse } from "./dashboard-overview-data-type";
 
 const overviewCards = [
   {
     label: "Total Users",
     key: "totalUsers",
-    fallbackKey: undefined,
     icon: Users,
     accent: "#3478FF",
     chartFill: "#F0F5FF",
@@ -24,8 +24,7 @@ const overviewCards = [
   },
   {
     label: "Active Subscribers",
-    key: "totalSubmissions",
-    fallbackKey: undefined,
+    key: "activeSubscribers",
     icon: Bell,
     accent: "#0793B8",
     chartFill: "#ECFCFF",
@@ -38,8 +37,7 @@ const overviewCards = [
   },
   {
     label: "Monthly Revenue",
-    key: "totalRevenue",
-    fallbackKey: undefined,
+    key: "monthlyRevenue",
     icon: CircleDollarSign,
     accent: "#20B75A",
     chartFill: "#EEFCF3",
@@ -52,8 +50,7 @@ const overviewCards = [
   },
   {
     label: "Credits Consumed",
-    key: "totalPayments",
-    fallbackKey: undefined,
+    key: "creditsConsumed",
     icon: Coins,
     valuePrefix: "",
     accent: "#F5A524",
@@ -88,11 +85,11 @@ export function DashboardOverview() {
     isError,
     error,
     refetch,
-  } = useQuery<DashboardOverviewsApiResponse>({
-    queryKey: ["dashboard-overview"],
+  } = useQuery<DashboardCardsApiResponse>({
+    queryKey: ["admin-dashboard-cards"],
     queryFn: async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/dashboard/overview`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin-dashboard/cards`,
         {
           method: "GET",
           headers: {
@@ -102,13 +99,13 @@ export function DashboardOverview() {
       );
 
       if (!res.ok) {
-        throw new Error("Failed to fetch dashboard overview");
+        throw new Error("Failed to fetch dashboard cards");
       }
 
       const response = await res.json();
 
       if (!response?.success) {
-        throw new Error(response?.message || "Failed to fetch dashboard overview");
+        throw new Error(response?.message || "Failed to fetch dashboard cards");
       }
 
       return response;
@@ -147,10 +144,14 @@ export function DashboardOverview() {
     );
   }
 
+  if (!data?.data) {
+    return <div className="p-4 sm:p-6"><ApiEmptyState message="No overview data found." /></div>;
+  }
+
   return (
     <div className="mx-auto grid w-full grid-cols-1 gap-3 px-4 py-3 sm:grid-cols-2 sm:px-5 lg:grid-cols-4">
-      {overviewCards.map(({ label, key, fallbackKey, icon: Icon, valuePrefix = "", iconClass, currency, accent, chartFill, trend, trendLabel, trendClass }) => {
-        const value = data?.data?.[key] ?? (fallbackKey ? data?.data?.[fallbackKey] : undefined) ?? 0;
+      {overviewCards.map(({ label, key, icon: Icon, valuePrefix = "", iconClass, currency, accent, chartFill, trend, trendLabel, trendClass }) => {
+        const value = data?.data?.[key]?.value ?? 0;
         return (
         <div
           key={key}
