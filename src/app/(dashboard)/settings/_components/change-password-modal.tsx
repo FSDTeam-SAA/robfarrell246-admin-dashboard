@@ -1,7 +1,7 @@
 "use client";
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { KeyRound, X } from "lucide-react";
+import { Eye, EyeOff, KeyRound, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useChangePassword } from "./settings-api";
@@ -56,9 +56,9 @@ const ChangePasswordModal = ({ isOpen, onClose, onSave }: ChangePasswordModalPro
           <DialogDescription className="mt-1 text-[11px] text-[#7E8EA5]">Use a strong password you do not use elsewhere.</DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="px-5 py-4">
-          <PasswordField label="Current Password" value={currentPassword} onChange={setCurrentPassword} />
-          <div className="mt-3"><PasswordField label="New Password" value={newPassword} onChange={setNewPassword} /></div>
-          <div className="mt-3"><PasswordField label="Confirm New Password" value={confirmPassword} onChange={setConfirmPassword} /></div>
+          <PasswordField label="Current Password" placeholder="********" value={currentPassword} onChange={setCurrentPassword} />
+          <div className="mt-3"><PasswordField label="New Password" placeholder="********" value={newPassword} onChange={setNewPassword} /></div>
+          <div className="mt-3"><PasswordField label="Confirm New Password" placeholder="********" value={confirmPassword} onChange={setConfirmPassword} /></div>
           {error && <p className="mt-3 text-[11px] text-[#D92D20]" role="alert">{error}</p>}
           <footer className="mt-5 grid grid-cols-2 gap-3"><button type="button" onClick={close} className="h-[35px] bg-[#F1F4F8] text-[12px] text-[#53647C] hover:bg-[#E7ECF2]">Cancel</button><button disabled={changePassword.isPending} type="submit" className="h-[35px] bg-[#2861E7] text-[12px] font-medium text-white hover:bg-[#1F53CC] disabled:opacity-60">{changePassword.isPending ? "Updating..." : "Update Password"}</button></footer>
         </form>
@@ -67,6 +67,10 @@ const ChangePasswordModal = ({ isOpen, onClose, onSave }: ChangePasswordModalPro
   );
 };
 
-const PasswordField = ({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) => <label className="block text-[11px] font-medium text-[#344054]"><span className="mb-1.5 block">{label}</span><input required type="password" value={value} onChange={(event) => onChange(event.target.value)} className="form-input" autoComplete="new-password" /></label>;
+const PasswordField = ({ label, placeholder, value, onChange }: { label: string; placeholder: string; value: string; onChange: (value: string) => void }) => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  return <label className="block text-[11px] font-medium text-[#344054]"><span className="mb-1.5 block">{label}</span><span className="relative block"><input required type={isVisible ? "text" : "password"} placeholder={placeholder} value={value} onChange={(event) => onChange(event.target.value)} className="form-input pr-9 placeholder:text-[#8293AD]" autoComplete="new-password" /><button type="button" onClick={() => setIsVisible((current) => !current)} aria-label={isVisible ? `Hide ${label}` : `Show ${label}`} title={isVisible ? "Hide password" : "Show password"} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#718097] hover:text-[#2861E7]">{isVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button></span></label>;
+};
 
 export default ChangePasswordModal;

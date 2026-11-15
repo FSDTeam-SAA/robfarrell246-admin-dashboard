@@ -5,8 +5,6 @@ export type CreditPlan = {
   description: string;
   credits: number;
   price: number;
-  purchases: number;
-  active: boolean;
   featured?: boolean;
 };
 
@@ -16,11 +14,20 @@ export type Purchase = {
   id: string;
   customer: string;
   email: string;
-  role: "Broker" | "Tenant";
+  userId?: string;
+  role: "Broker" | "Tenant" | "Unknown";
   plan: string;
   credits: number;
   amount: number;
   date: string;
   paymentMethod: string;
   transactionId: string;
+  status: "PENDING" | "SUCCEEDED" | "FAILED";
+};
+
+export type CreditOverviewCards = {
+  totalCreditPackEarnings: number;
+  totalCreditsSold: number;
+  totalCreditsUsed: number;
+  activeCreditsInCirculation: number;
 };

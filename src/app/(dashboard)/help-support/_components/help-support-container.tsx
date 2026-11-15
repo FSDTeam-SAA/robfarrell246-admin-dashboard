@@ -18,7 +18,8 @@ const HelpSupportContainer = () => {
   const [impact, setImpact] = useState<TicketImpact | "All">("All");
   const [assignee, setAssignee] = useState("All");
   const ticketsQuery = useSupportTickets();
-  const tickets = ticketsQuery.data ?? EMPTY_TICKETS;
+  const tickets = ticketsQuery.data?.tickets ?? EMPTY_TICKETS;
+  const totalTickets = ticketsQuery.data?.total ?? 0;
   const visibleTickets = useMemo(() => {
     const term = query.toLowerCase().trim();
     return tickets.filter((ticket) => (
@@ -35,7 +36,7 @@ const HelpSupportContainer = () => {
     <section className="bg-[#F4F7FB] p-4 sm:p-6">
       <div className="mx-auto max-w-[1600px]">
         {ticketsQuery.isLoading ? <ApiLoadingSkeleton rows={6} /> : ticketsQuery.isError ? <ApiErrorState message={ticketsQuery.error.message} onRetry={() => ticketsQuery.refetch()} /> : tickets.length === 0 ? <ApiEmptyState message="No support tickets found." /> : <>
-          <SupportSummary tickets={tickets.length} />
+          <SupportSummary tickets={tickets} total={totalTickets} />
           <div className="mt-3 overflow-hidden rounded-[6px]">
             <SupportFilters query={query} status={status} impact={impact} assignee={assignee} onQuery={setQuery} onStatus={setStatus} onImpact={setImpact} onAssignee={setAssignee} />
             <SupportTicketTable tickets={visibleTickets} onSelect={(ticket) => setSelectedTicketId(ticket.id)} />

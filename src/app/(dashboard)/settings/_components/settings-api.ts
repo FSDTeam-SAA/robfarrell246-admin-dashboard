@@ -10,9 +10,13 @@ export type Profile = {
   companyName?: string;
   phone?: string;
   profileImage?: string;
+  creditBalance?: number;
 };
 
 type ApiEnvelope<T> = { success: boolean; message: string; data: T };
+
+const apiBaseUrl = () =>
+  (process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5003/api/v1").replace(/\/$/, "");
 
 function useAccessToken() {
   const { data: session } = useSession();
@@ -20,7 +24,7 @@ function useAccessToken() {
 }
 
 async function request<T>(path: string, token?: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}${path}`, {
+  const response = await fetch(`${apiBaseUrl()}${path}`, {
     ...options,
     headers: { Authorization: `Bearer ${token}`, ...options?.headers },
   });

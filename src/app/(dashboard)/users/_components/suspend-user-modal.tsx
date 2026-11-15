@@ -11,6 +11,8 @@ import { AlertTriangle, ArrowRight, CircleX } from "lucide-react";
 type SuspendUserModalProps = {
   isOpen: boolean;
   userName: string | null;
+  isSuspended: boolean;
+  isPending: boolean;
   onClose: () => void;
   onConfirm: () => void;
 };
@@ -18,6 +20,8 @@ type SuspendUserModalProps = {
 const SuspendUserModal = ({
   isOpen,
   userName,
+  isSuspended,
+  isPending,
   onClose,
   onConfirm,
 }: SuspendUserModalProps) => (
@@ -32,7 +36,7 @@ const SuspendUserModal = ({
             <AlertTriangle className="h-5 w-5 fill-[#E5262A] text-[#E5262A]" strokeWidth={2} />
             <span className="absolute -mt-px text-[11px] font-bold leading-none text-white">!</span>
           </span>
-          Suspend User Account
+          {isSuspended ? "Reactivate User Account" : "Suspend User Account"}
         </DialogTitle>
       </DialogHeader>
 
@@ -42,7 +46,7 @@ const SuspendUserModal = ({
           <span className="absolute -mt-px text-[29px] font-bold leading-none text-white">!</span>
         </span>
         <DialogDescription className="text-[14px] leading-5 text-[#6A7C9B]">
-          Are you sure you want to suspend access for {userName}?
+          Are you sure you want to {isSuspended ? "reactivate" : "suspend access for"} {userName}?
         </DialogDescription>
       </div>
 
@@ -58,9 +62,10 @@ const SuspendUserModal = ({
         <button
           type="button"
           onClick={onConfirm}
-          className="flex h-11 items-center justify-center gap-2 rounded-[2px] bg-[#E5262A] px-4 text-[14px] font-medium text-white transition hover:bg-[#C91D22]"
+          disabled={isPending}
+          className={`flex h-11 items-center justify-center gap-2 rounded-[2px] px-4 text-[14px] font-medium text-white transition disabled:opacity-60 ${isSuspended ? "bg-[#00A550] hover:bg-[#078341]" : "bg-[#E5262A] hover:bg-[#C91D22]"}`}
         >
-          Suspend Account
+          {isPending ? "Saving..." : isSuspended ? "Reactivate Account" : "Suspend Account"}
           <ArrowRight className="h-4 w-4" strokeWidth={1.8} />
         </button>
       </DialogFooter>

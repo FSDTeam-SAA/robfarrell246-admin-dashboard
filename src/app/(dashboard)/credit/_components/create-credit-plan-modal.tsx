@@ -8,8 +8,9 @@ import type { CreditPlan, PlanFormValues } from "./credit-types";
 type CreateCreditPlanModalProps = {
   plan: CreditPlan | null;
   isOpen: boolean;
+  isSaving: boolean;
   onClose: () => void;
-  onSave: (values: PlanFormValues) => void;
+  onSave: (values: PlanFormValues) => Promise<void>;
 };
 
 const emptyForm: PlanFormValues = {
@@ -21,7 +22,7 @@ const emptyForm: PlanFormValues = {
   featured: false,
 };
 
-const CreateCreditPlanModal = ({ plan, isOpen, onClose, onSave }: CreateCreditPlanModalProps) => {
+const CreateCreditPlanModal = ({ plan, isOpen, isSaving, onClose, onSave }: CreateCreditPlanModalProps) => {
   const [form, setForm] = useState<PlanFormValues>(emptyForm);
 
   useEffect(() => {
@@ -39,10 +40,10 @@ const CreateCreditPlanModal = ({ plan, isOpen, onClose, onSave }: CreateCreditPl
     setForm((current) => ({ ...current, [key]: value }));
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!form.title.trim()) return;
-    onSave({ ...form, title: form.title.trim(), badge: form.badge.trim(), description: form.description.trim() });
+    await onSave({ ...form, title: form.title.trim(), badge: form.badge.trim(), description: form.description.trim() });
   };
 
   const unitPrice = form.credits > 0 ? (form.price / form.credits).toFixed(2) : "0.00";
@@ -66,7 +67,7 @@ const CreateCreditPlanModal = ({ plan, isOpen, onClose, onSave }: CreateCreditPl
             <div className="sm:col-span-2"><Field label="Description & Value Pitch"><textarea value={form.description} onChange={(event) => setValue("description", event.target.value)} placeholder="standard" className="form-input min-h-[82px] resize-none py-3" /></Field></div>
             <label className="flex items-center gap-2 text-[11px] text-[#2666E8]"><input type="checkbox" checked={form.featured} onChange={(event) => setValue("featured", event.target.checked)} className="h-3.5 w-3.5 rounded border-[#CED8E6] accent-[#2861E7]" />Featured / Most Popular</label>
           </div>
-          <footer className="grid grid-cols-2 gap-4 bg-[#FAFBFC] px-4 py-4"><button type="button" onClick={onClose} className="h-[35px] bg-[#F4F6F9] text-[12px] text-[#5D6B82] transition hover:bg-[#EBEFF4]">Cancel</button><button type="submit" className="h-[35px] bg-[#2861E7] text-[12px] font-medium text-white transition hover:bg-[#1F53CC]">{isEditing ? "Save Changes" : "Save & Publish Plan"}</button></footer>
+          <footer className="grid grid-cols-2 gap-4 bg-[#FAFBFC] px-4 py-4"><button type="button" disabled={isSaving} onClick={onClose} className="h-[35px] bg-[#F4F6F9] text-[12px] text-[#5D6B82] transition hover:bg-[#EBEFF4] disabled:opacity-60">Cancel</button><button type="submit" disabled={isSaving} className="h-[35px] bg-[#2861E7] text-[12px] font-medium text-white transition hover:bg-[#1F53CC] disabled:opacity-60">{isSaving ? "Saving..." : isEditing ? "Save Changes" : "Save & Publish Plan"}</button></footer>
         </form>
       </DialogContent>
     </Dialog>

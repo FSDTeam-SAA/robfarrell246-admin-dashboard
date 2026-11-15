@@ -4,9 +4,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { statusToApi, toSupportTicket, type SupportTicket, type TicketStatus } from "./help-support-types";
 
-type ApiEnvelope<T> = { success: boolean; message: string; data: T };
+type ApiEnvelope<T> = { success: boolean; message: string; data: T; meta?: { total?: number } };
 type BackendTicket = Parameters<typeof toSupportTicket>[0];
 type TicketListData = { tickets: BackendTicket[] };
+
+const apiBaseUrl = () =>
+  (process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5003/api/v1").replace(/\/$/, "");
 
 function useAccessToken() {
   const { data: session } = useSession();
@@ -14,7 +17,7 @@ function useAccessToken() {
 }
 
 async function request<T>(path: string, token?: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}${path}`, {
+  const response = await fetch(`${apiBaseUrl()}${path}`, {
     ...options,
     headers: { Authorization: `Bearer ${token}`, ...options?.headers },
   });
@@ -25,11 +28,14 @@ async function request<T>(path: string, token?: string, options?: RequestInit): 
 
 export function useSupportTickets() {
   const token = useAccessToken();
-  return useQuery<SupportTicket[]>({
+  return useQuery<{ tickets: SupportTicket[]; total: number }>({
     queryKey: ["admin-support-tickets"],
     queryFn: async () => {
       const payload = await request<ApiEnvelope<TicketListData>>("/help-support/admin/all?limit=100", token);
-      return payload.data.tickets.map(toSupportTicket);
+      return {
+        tickets: payload.data.tickets.map(toSupportTicket),
+        total: payload.meta?.total ?? payload.data.tickets.length,
+      };
     },
     enabled: Boolean(token),
   });

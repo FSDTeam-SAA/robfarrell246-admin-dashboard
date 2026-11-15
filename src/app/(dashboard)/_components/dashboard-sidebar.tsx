@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -54,6 +54,7 @@ const navigationSections = [
 
 export function DashboardSidebar() {
   const pathname = usePathname();
+  const { data: session } = useSession();
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
 
   const isActive = (url: string) =>
@@ -61,6 +62,14 @@ export function DashboardSidebar() {
 
   const handleLogout = async () => {
     try {
+      const accessToken = (session?.user as { accessToken?: string } | undefined)?.accessToken;
+      const apiBaseUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5003/api/v1").replace(/\/$/, "");
+      if (accessToken) {
+        await fetch(`${apiBaseUrl}/auth/logout`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+      }
       toast.success("Logout successful!");
       await signOut({ callbackUrl: "/login" });
     } catch {
