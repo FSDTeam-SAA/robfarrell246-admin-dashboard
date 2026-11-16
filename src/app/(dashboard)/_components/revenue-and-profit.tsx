@@ -4,18 +4,21 @@ import { useState } from "react";
 import { ApiEmptyState, ApiErrorState, ApiLoadingSkeleton } from "./api-feedback";
 import { useAdminDashboardCharts } from "./admin-dashboard-queries";
 
-const periods = ["30 days", "7 days", "12 months"] as const;
+const periods = ["7 days", "12 months"] as const;
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 const yLabels = ["$300k", "$225k", "$150k", "$75k", "$0k"];
 
 const chartRange = {
   "7 days": "7d",
-  "30 days": "30d",
   "12 months": "12m",
 } as const;
 
-const compactLabel = (label: string) => label.length > 7 ? label.slice(5) : label;
+const formatChartLabel = (label: string, range: "7d" | "12m") => {
+  const date = new Date(`${range === "12m" ? `${label}-01` : label}T12:00:00`);
+  return new Intl.DateTimeFormat("en-US", range === "12m" ? { month: "short" } : { month: "short", day: "numeric" }).format(date);
+};
+const calendarMonth = (label: string) => Number(label.slice(5, 7));
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -27,12 +30,14 @@ const RevenueAndProfit = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<(typeof periods)[number]>("12 months");
   const [activeMonth, setActiveMonth] = useState(5);
   const { data, isLoading, isError, error, refetch } = useAdminDashboardCharts(chartRange[selectedPeriod]);
-  const chartData = data?.data.revenueChart ?? [];
+  const rawChartData = data?.data.revenueChart ?? [];
+  const chartData = selectedPeriod === "12 months" ? [...rawChartData].sort((first, second) => calendarMonth(first.label) - calendarMonth(second.label)) : rawChartData;
   const maxValue = Math.max(
     ...chartData.flatMap(({ revenue, profit }) => [revenue, profit]),
     1,
   );
   const activeIndex = Math.min(activeMonth, Math.max(chartData.length - 1, 0));
+  const tooltipOnRightEdge = activeIndex >= chartData.length - 2;
 
   if (isLoading) return <ApiLoadingSkeleton rows={5} />;
   if (isError) return <ApiErrorState message={error.message} onRetry={() => refetch()} />;
@@ -94,7 +99,7 @@ const RevenueAndProfit = () => {
             )}
 
             <g fill="#667A99" fontFamily="inherit" fontSize="14" textAnchor="middle">
-              {chartData.map((point, index) => <text key={point.label} x={70 + index * (657 / Math.max(chartData.length, 1))} y="325">{compactLabel(point.label)}</text>)}
+              {chartData.map((point, index) => <text key={point.label} x={70 + index * (657 / Math.max(chartData.length, 1))} y="325">{formatChartLabel(point.label, chartRange[selectedPeriod])}</text>)}
             </g>
             <g fill="#667A99" fontSize="13" textAnchor="middle">
               {chartData.slice(0, -1).map((point, index) => <text key={`${point.label}-dot`} x={97.5 + index * (657 / Math.max(chartData.length, 1))} y="325">·</text>)}
@@ -103,9 +108,9 @@ const RevenueAndProfit = () => {
 
           <div
             className="pointer-events-none absolute w-[109px] rounded-md bg-white px-2.5 py-2 text-[11px] text-[#5D6D85] shadow-[0_4px_12px_rgba(35,51,82,0.10)]"
-            style={{ left: `${12 + activeMonth * 7.2}%`, top: "46px" }}
+            style={tooltipOnRightEdge ? { right: "2%", top: "46px" } : { left: `${12 + activeMonth * 7.2}%`, top: "46px" }}
           >
-            <p className="border-b border-[#EEF1F5] pb-1 font-medium text-[#1D293D]">{chartData[activeIndex]?.label || months[activeMonth]}</p>
+            <p className="border-b border-[#EEF1F5] pb-1 font-medium text-[#1D293D]">{chartData[activeIndex] ? formatChartLabel(chartData[activeIndex].label, chartRange[selectedPeriod]) : months[activeMonth]}</p>
             <p className="mt-1 flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[#64758E]" />Revenue <b className="text-[#1D293D]">{formatCurrency(chartData[activeIndex]?.revenue ?? 0)}</b></p>
             <p className="mt-1 flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[#64758E]" />Profit <b className="text-[#1D293D]">{formatCurrency(chartData[activeIndex]?.profit ?? 0)}</b></p>
           </div>

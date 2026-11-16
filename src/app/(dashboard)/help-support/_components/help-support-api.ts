@@ -7,6 +7,7 @@ import { statusToApi, toSupportTicket, type SupportTicket, type TicketStatus } f
 type ApiEnvelope<T> = { success: boolean; message: string; data: T; meta?: { total?: number } };
 type BackendTicket = Parameters<typeof toSupportTicket>[0];
 type TicketListData = { tickets: BackendTicket[] };
+export type SupportCards = { totalRequests: number; activeQueue: number; waitingOnUser: number; resolvedClosed: number };
 
 const apiBaseUrl = () =>
   (process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5003/api/v1").replace(/\/$/, "");
@@ -41,6 +42,18 @@ export function useSupportTickets() {
   });
 }
 
+export function useSupportCards() {
+  const token = useAccessToken();
+  return useQuery<SupportCards>({
+    queryKey: ["admin-support-cards"],
+    queryFn: async () => {
+      const payload = await request<ApiEnvelope<SupportCards>>("/help-support/admin/cards", token);
+      return payload.data;
+    },
+    enabled: Boolean(token),
+  });
+}
+
 export function useSupportTicket(ticketId: string | null) {
   const token = useAccessToken();
   return useQuery<SupportTicket>({
@@ -62,7 +75,10 @@ export function useUpdateTicketStatus(ticketId: string) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: statusToApi[status] }),
     }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-support-tickets"] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-support-tickets"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-support-cards"] });
+    },
   });
 }
 
@@ -78,6 +94,7 @@ export function useReplyToTicket(ticketId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-support-ticket", ticketId] });
       queryClient.invalidateQueries({ queryKey: ["admin-support-tickets"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-support-cards"] });
     },
   });
 }

@@ -12,10 +12,15 @@ type DashboardOverviewHeaderProps = {
   description: string;
 };
 
-const DashboardOverviewHeader = ({ title, description }: DashboardOverviewHeaderProps) => {
+const DashboardOverviewHeader = ({
+  title,
+  description,
+}: DashboardOverviewHeaderProps) => {
   const profileQuery = useProfile();
   const profile = profileQuery.data;
-  const displayName = profile?.name || (profileQuery.isLoading ? "Loading..." : "Profile unavailable");
+  const displayName =
+    profile?.name ||
+    (profileQuery.isLoading ? "Loading..." : "Profile unavailable");
   const displayEmail = profile?.email || "—";
   const avatar = profile?.profileImage || noUserImage;
   const creditBalance = profile?.creditBalance ?? 0;
@@ -24,8 +29,14 @@ const DashboardOverviewHeader = ({ title, description }: DashboardOverviewHeader
     <header className="sticky top-0 z-50 w-full border-b border-[#DCE4EE] bg-white px-4 shadow-[0_2px_10px_rgba(35,52,81,0.04)] sm:px-6">
       <div className="mx-auto flex min-h-[62px] w-full max-w-[1600px] items-center justify-between gap-5 py-2">
         <div className="min-w-0 pl-12 sm:pl-0">
-          <h1 className="truncate text-[20px] font-semibold leading-tight tracking-[-0.02em] text-[#151D30]">{title}</h1>
-          {description && <p className="mt-1 truncate text-[12px] leading-none text-[#5D6B82] sm:text-[13px]">{description}</p>}
+          <h1 className="truncate text-[20px] font-semibold leading-tight tracking-[-0.02em] text-[#151D30]">
+            {title}
+          </h1>
+          {description && (
+            <p className="mt-1 truncate text-[12px] leading-none text-[#5D6B82] sm:text-[13px]">
+              {description}
+            </p>
+          )}
         </div>
 
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
@@ -44,12 +55,25 @@ const DashboardOverviewHeader = ({ title, description }: DashboardOverviewHeader
             aria-label="Open profile menu"
             className="hidden h-[40px] min-w-[176px] items-center gap-2 rounded-[3px] border border-[#E0E7F0] bg-white px-2.5 text-left transition hover:bg-[#F8FAFD] md:flex"
           >
-            <Image src={avatar} width={24} height={24} alt={`${displayName} profile image`} className="h-6 w-6 rounded-full object-cover" />
+            <Image
+              src={avatar}
+              width={24}
+              height={24}
+              alt={`${displayName} profile image`}
+              className="h-6 w-6 rounded-full object-cover"
+            />
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-[11px] font-medium leading-4 text-[#1B2638]">{displayName}</span>
-              <span className="block truncate text-[9px] leading-3 text-[#718097]">{displayEmail}</span>
+              <span className="block truncate text-[11px] font-medium leading-4 text-[#1B2638]">
+                {displayName}
+              </span>
+              <span className="block truncate text-[9px] leading-3 text-[#718097]">
+                {displayEmail}
+              </span>
             </span>
-            <ChevronDown className="h-3.5 w-3.5 shrink-0 text-[#748298]" strokeWidth={1.7} />
+            <ChevronDown
+              className="h-3.5 w-3.5 shrink-0 text-[#748298]"
+              strokeWidth={1.7}
+            />
           </button>
         </div>
       </div>
