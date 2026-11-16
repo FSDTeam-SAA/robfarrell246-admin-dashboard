@@ -1,6 +1,7 @@
 "use client";
 
 import { Check, ImagePlus, Upload } from "lucide-react";
+import Image from "next/image";
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -225,8 +226,11 @@ const ProfilePanel = ({ profile }: { profile: Profile }) => {
           <span className="flex min-h-[49px] items-center justify-between gap-3 rounded-[3px] border border-[#9DACBF] px-3">
             <span className="flex min-w-0 items-center gap-2">
               {logoPreview ? (
-                <img
+                <Image
                   src={logoPreview}
+                  width={36}
+                  height={36}
+                  unoptimized
                   alt="Selected company logo preview"
                   className="h-9 w-9 shrink-0 rounded-[4px] border border-[#D7E0EB] object-cover"
                 />

@@ -7,6 +7,8 @@ import { ApiEmptyState, ApiErrorState, ApiLoadingSkeleton } from "../../_compone
 import { useDeletePropertyAnalysis, usePropertyAnalyses, type DashboardProject } from "./projects-api";
 import ProjectDetail from "./project-detail";
 
+const EMPTY_PROJECTS: DashboardProject[] = [];
+
 function useDebouncedValue<T>(value: T, delay = 350) {
   const [debouncedValue, setDebouncedValue] = useState(value);
   useEffect(() => {
@@ -24,7 +26,7 @@ const ProjectsContainer = () => {
   const debouncedQuery = useDebouncedValue(query);
   const projectsQuery = usePropertyAnalyses({ page, search: debouncedQuery });
   const deleteProject = useDeletePropertyAnalysis();
-  const projects = projectsQuery.data?.projects ?? [];
+  const projects = projectsQuery.data?.projects ?? EMPTY_PROJECTS;
 
   useEffect(() => setPage(1), [debouncedQuery]);
 

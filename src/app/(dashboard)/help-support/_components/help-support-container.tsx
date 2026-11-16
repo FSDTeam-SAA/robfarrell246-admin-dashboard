@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { ApiEmptyState, ApiErrorState, ApiLoadingSkeleton } from "../../_components/api-feedback";
 import { useSupportCards, useSupportTickets } from "./help-support-api";
 import SupportFilters from "./support-filters";
@@ -12,12 +13,18 @@ import { type SupportTicket, type TicketImpact, type TicketStatus } from "./help
 const EMPTY_TICKETS: SupportTicket[] = [];
 
 const HelpSupportContainer = () => {
+  const router = useRouter();
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<TicketStatus | "All">("All");
   const [impact, setImpact] = useState<TicketImpact | "All">("All");
   const ticketsQuery = useSupportTickets();
   const cardsQuery = useSupportCards();
+
+  useEffect(() => {
+    const ticketFromNotification = new URLSearchParams(window.location.search).get("ticket");
+    if (ticketFromNotification) setSelectedTicketId(ticketFromNotification);
+  }, []);
   const tickets = ticketsQuery.data?.tickets ?? EMPTY_TICKETS;
   const visibleTickets = useMemo(() => {
     const term = query.toLowerCase().trim();
@@ -28,7 +35,7 @@ const HelpSupportContainer = () => {
     ));
   }, [impact, query, status, tickets]);
 
-  if (selectedTicketId) return <TicketDetail ticketId={selectedTicketId} onBack={() => setSelectedTicketId(null)} />;
+  if (selectedTicketId) return <TicketDetail ticketId={selectedTicketId} onBack={() => { setSelectedTicketId(null); router.replace("/help-support"); }} />;
 
   return (
     <section className="bg-[#F4F7FB] p-4 sm:p-6">

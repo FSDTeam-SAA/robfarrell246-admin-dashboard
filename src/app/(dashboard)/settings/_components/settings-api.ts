@@ -39,6 +39,8 @@ export function useProfile() {
     queryKey: ["admin-profile"],
     queryFn: async () => (await request<ApiEnvelope<Profile>>("/user/me", token)).data,
     enabled: Boolean(token),
+    refetchInterval: 30_000,
+    refetchIntervalInBackground: false,
   });
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import type { CreditOverviewCards, CreditPlan, PlanFormValues, Purchase } from "./credit-types";
 
@@ -37,6 +37,10 @@ type BackendPurchase = {
 type PurchasesData = {
   purchases: BackendPurchase[];
   paginationInfo?: { currentPage?: number; totalPages?: number };
+};
+
+type MemberDetailData = {
+  user?: { role?: "LANDLORD" | "TENANT" | "ADMIN" };
 };
 
 const apiBaseUrl = () =>
@@ -142,6 +146,28 @@ export function useCreditPurchases(page: number) {
     enabled: Boolean(token),
     placeholderData: (previousData) => previousData,
   });
+}
+
+export function useCreditPurchaseRoles(purchases: Purchase[], enabled: boolean) {
+  const token = useAccessToken();
+  const userIds = Array.from(new Set(purchases.map((purchase) => purchase.userId).filter((userId): userId is string => Boolean(userId))));
+  const queries = useQueries({
+    queries: userIds.map((userId) => ({
+      queryKey: ["credit-purchase-member", userId],
+      queryFn: async () => {
+        const payload = await request<ApiEnvelope<MemberDetailData>>(`/credit-plan/members/${userId}`, token);
+        return payload.data.user?.role;
+      },
+      enabled: Boolean(token && enabled),
+      staleTime: 5 * 60_000,
+    })),
+  });
+
+  return userIds.reduce<Map<string, Purchase["role"]>>((roles, userId, index) => {
+    const role = queries[index]?.data;
+    roles.set(userId, role === "LANDLORD" ? "Broker" : role === "TENANT" ? "Tenant" : "Unknown");
+    return roles;
+  }, new Map());
 }
 
 export function useCreateCreditPlan() {
