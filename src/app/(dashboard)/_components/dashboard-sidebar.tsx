@@ -7,7 +7,7 @@ import {
   LogOut,
   MessageCircleMore,
   Settings,
-  Store,
+  // Store,
   Users,
   Coins,
 } from "lucide-react";
@@ -33,7 +33,7 @@ const navigationSections = [
     items: [
       { title: "Users", url: "/users", icon: Users },
       { title: "Projects", url: "/projects", icon: BriefcaseBusiness },
-      { title: "Business", url: "/business", icon: Store },
+      // { title: "Business", url: "/business", icon: Store },
     ],
   },
   {

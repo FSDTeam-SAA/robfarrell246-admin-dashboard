@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, ChevronLeft, ChevronRight, Eye, Search, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, Eye, Search, Trash2, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { ApiEmptyState, ApiErrorState, ApiLoadingSkeleton } from "../../_components/api-feedback";
@@ -46,7 +46,7 @@ const ProjectsContainer = () => {
   return <section className="p-4 sm:p-6">
     <div className="overflow-hidden rounded-[3px] border border-[#E0E7F0] bg-white">
       <div className="flex min-h-[46px] flex-col justify-between gap-3 bg-[#2948B4] px-3 py-2 sm:flex-row sm:items-center sm:px-3.5">
-        <label className="relative block w-full sm:w-[250px]"><Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#77849A]" strokeWidth={1.6} /><input type="text" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search..." aria-label="Search projects" className="h-[24px] w-full rounded-[3px] border-0 bg-white py-1 pl-7 pr-9 text-[11px] text-[#26364D] outline-none placeholder:text-[#8A96A8] focus:ring-2 focus:ring-white/60" /><kbd className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 rounded border border-[#D7DEE8] bg-[#F7F9FC] px-1 py-px text-[8px] text-[#7E8999]">⌘K</kbd></label>
+        <label className="relative block w-full sm:w-[250px]"><Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#77849A]" strokeWidth={1.6} /><input type="text" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search..." aria-label="Search projects" className="h-[24px] w-full rounded-[3px] border-0 bg-white py-1 pl-7 pr-9 text-[11px] text-[#26364D] outline-none placeholder:text-[#8A96A8] focus:ring-2 focus:ring-white/60" />{query ? <button type="button" onClick={() => setQuery("")} aria-label="Clear project search" className="absolute right-1.5 top-1/2 inline-flex h-4 w-4 -translate-y-1/2 items-center justify-center rounded text-[#64748B] hover:bg-[#EEF2F7] hover:text-[#27364B]"><X className="h-3 w-3" strokeWidth={2.5} /></button> : <kbd className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 rounded border border-[#D7DEE8] bg-[#F7F9FC] px-1 py-px text-[8px] text-[#7E8999]">⌘K</kbd>}</label>
         <label className="flex items-center justify-end gap-2 text-[11px] text-white"><span>Analysis Type:</span><span className="relative"><select value={analysisType} onChange={(event) => setAnalysisType(event.target.value)} aria-label="Filter by analysis type" className="h-[24px] appearance-none rounded-[3px] border-0 bg-white py-1 pl-2 pr-6 text-[10px] text-[#344054] outline-none"><option value="ALL">All Analysis Types ({projectsQuery.data?.total ?? 0})</option>{analysisTypes.map((type) => <option key={type} value={type}>{type}</option>)}</select><ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 h-3 w-3 -translate-y-1/2 text-[#526174]" /></span></label>
       </div>
 
