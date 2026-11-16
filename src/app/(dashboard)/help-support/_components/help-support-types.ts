@@ -34,6 +34,7 @@ type BackendTicket = {
   subject: string;
   description: string;
   topic: string;
+  customTopic?: string;
   priority: "LOW" | "NORMAL" | "HIGH";
   status: "OPEN" | "IN_REVIEW" | "RESOLVED" | "CLOSED";
   createdAt: string;
@@ -80,7 +81,7 @@ export function toSupportTicket(ticket: BackendTicket): SupportTicket {
     subject: ticket.subject,
     message: ticket.description,
     project: "—",
-    topic: ticket.topic.replaceAll("_", " "),
+    topic: ticket.customTopic?.trim() || ticket.topic.replaceAll("_", " "),
     impact: impactLabels[ticket.priority],
     status: statusLabels[ticket.status],
     assignee: "Unassigned (Support Pool)",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 
 type ApiEnvelope<T> = {
@@ -28,6 +28,13 @@ export type DashboardUser = {
   role: "BROKER" | "TENANT";
   credits: number;
   status: "ACTIVE" | "SUSPENDED";
+  plan: string | null;
+};
+
+type MemberDetailData = {
+  purchases?: Array<{
+    plan?: { title?: string } | string | null;
+  }>;
 };
 
 type UserListData = {
@@ -43,6 +50,7 @@ const toDashboardUser = (user: BackendUser): DashboardUser => ({
   role: user.role === "LANDLORD" ? "BROKER" : "TENANT",
   credits: user.creditBalance ?? 0,
   status: user.isSuspended ? "SUSPENDED" : "ACTIVE",
+  plan: null,
 });
 
 function useAccessToken() {
@@ -91,4 +99,26 @@ export function useSetUserSuspension() {
     }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-users"] }),
   });
+}
+
+export function useUserPlanLookup(users: DashboardUser[]) {
+  const token = useAccessToken();
+  const userIds = Array.from(new Set(users.map((user) => user.id)));
+  const queries = useQueries({
+    queries: userIds.map((userId) => ({
+      queryKey: ["admin-user-credit-plan", userId],
+      queryFn: async () => {
+        const payload = await request<ApiEnvelope<MemberDetailData>>(`/credit-plan/members/${userId}`, token);
+        const plan = payload.data.purchases?.[0]?.plan;
+        return typeof plan === "object" ? plan?.title || null : null;
+      },
+      enabled: Boolean(token),
+      staleTime: 5 * 60_000,
+    })),
+  });
+
+  return userIds.reduce<Map<string, string | null>>((plans, userId, index) => {
+    plans.set(userId, queries[index]?.data ?? null);
+    return plans;
+  }, new Map());
 }

@@ -88,7 +88,7 @@ export function DashboardSidebar() {
           }}
         >
           <div className="flex min-h-svh flex-col">
-            <div className="flex h-[88px] shrink-0 items-center border-b border-[#DCE3EC] bg-white px-10">
+            <div className="flex h-[63px] shrink-0 items-center border-b border-[#DCE3EC] bg-white px-10">
               <Link
                 href="/"
                 aria-label="Go to dashboard overview"
