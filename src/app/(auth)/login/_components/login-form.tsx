@@ -82,12 +82,14 @@ const LoginForm = () => {
         return;
       }
 
-      if (res.ok) {
-        toast.success("Login successful!");
-
-        // Full reload so middleware can detect fresh token properly
-        window.location.href = res.url || "/";
+      if (!res.ok) {
+        toast.error("Login failed. Please try again.");
+        return;
       }
+
+      toast.success("Login successful!");
+      // Send the new session cookie to middleware on the current dashboard host.
+      window.location.replace("/");
     } catch (error) {
       console.error("Login failed:", error);
       toast.error("Login failed. Please try again.");

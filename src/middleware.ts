@@ -1,5 +1,6 @@
 import { getToken } from "next-auth/jwt";
 import { NextResponse, NextRequest } from "next/server";
+import { useSecureAuthCookies } from "@/lib/auth-cookie";
 
 const PUBLIC_ROUTES = [
   "/login",
@@ -24,6 +25,7 @@ export async function middleware(request: NextRequest) {
   const token = await getToken({
     req: request,
     secret: process.env.NEXTAUTH_SECRET,
+    secureCookie: useSecureAuthCookies,
   });
 
   if (!token || token.role !== "ADMIN") {

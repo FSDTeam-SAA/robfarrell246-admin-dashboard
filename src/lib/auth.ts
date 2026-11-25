@@ -1,5 +1,6 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { useSecureAuthCookies } from "@/lib/auth-cookie";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5003/api/v1";
@@ -22,6 +23,7 @@ type LoginResponse = {
 
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
+  useSecureCookies: useSecureAuthCookies,
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60,
